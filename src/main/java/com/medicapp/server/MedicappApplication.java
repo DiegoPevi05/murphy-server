@@ -1,5 +1,6 @@
 package com.medicapp.server;
 
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -9,5 +10,4 @@ public class MedicappApplication {
     public static void main(String[] args) {
         SpringApplication.run(MedicappApplication.class, args);
     }
-
 }
