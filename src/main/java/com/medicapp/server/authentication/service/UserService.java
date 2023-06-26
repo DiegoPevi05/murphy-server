@@ -1,17 +1,25 @@
 package com.medicapp.server.authentication.service;
 
 import com.medicapp.server.amazon.service.AwsS3Service;
+import com.medicapp.server.authentication.dto.RegisterRequest;
 import com.medicapp.server.authentication.dto.UserRequest;
 import com.medicapp.server.authentication.dto.UserResponse;
+import com.medicapp.server.authentication.model.Role;
 import com.medicapp.server.authentication.model.User;
 import com.medicapp.server.authentication.repository.UserRepository;
 import com.medicapp.server.config.ExceptionHandlerConfig;
+import com.medicapp.server.doctors.dto.DoctorRequest;
+import com.medicapp.server.doctors.model.Doctor;
+import com.medicapp.server.doctors.repository.DoctorRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +29,14 @@ public class UserService {
     private final UserRepository userRepository;
 
     private final AwsS3Service awsS3Service;
+    private final PasswordEncoder passwordEncoder;
+    private final DoctorRepository doctorRepository;
+
+    @Value("${default.image.profile_user_male}")
+    private String male_profile_image;
+
+    @Value("${default.image.profile_user_female}")
+    private String female_profile_image;
 
     private String bucketName =  "medicapp-bucket";
     private String filePath =  "ProfilesImages/";
@@ -37,6 +53,33 @@ public class UserService {
                 .role(user.getRole())
                 .build();
     }
+
+    public void addUser(RegisterRequest registerRequest){
+        if(userRepository.findByEmail(registerRequest.getEmail()).isPresent())
+            throw new ExceptionHandlerConfig.ResourceNotFoundException(
+                    "Usuario con email "+registerRequest.getEmail()+ " ya existe");
+
+        String defaultProfileImage = "";
+        if(!registerRequest.getSex().isEmpty() && registerRequest.getSex().equals("male")){
+            defaultProfileImage = male_profile_image;
+        }else if(!registerRequest.getSex().isEmpty() && registerRequest.getSex().equals("female")){
+            defaultProfileImage = female_profile_image;
+        }else{
+            defaultProfileImage = male_profile_image;
+        }
+
+        var user = User.builder()
+                .firstname(registerRequest.getFirstname())
+                .lastname(registerRequest.getLastname())
+                .email(registerRequest.getEmail())
+                .password(passwordEncoder.encode(registerRequest.getPassword()))
+                .role(Role.ROLE_USER)
+                .sex(registerRequest.getSex())
+                .enabled(true)
+                .profile_url(defaultProfileImage)
+                .build();
+        var savedUser = userRepository.save(user);
+    };
 
     @Transactional
     public void updateUserByUser(Integer User_id, UserRequest userRequest){
@@ -74,5 +117,17 @@ public class UserService {
             user.setProfile_key(fileKey);
             user.setProfile_url(UrlS3Object);
         }
+    }
+
+    public void deleteUser(int User_id){
+        User user = userRepository.findById(User_id)
+                .orElseThrow(() -> new ExceptionHandlerConfig.ResourceNotFoundException(
+                        "User con id " + User_id + " no existe"
+                ));
+
+        Optional<Doctor> doctor = doctorRepository.findByUserEmail(user.getEmail());
+        //if User is Doctor delete Doctor
+        doctor.ifPresent(value -> doctorRepository.deleteById(value.getId()));
+        userRepository.deleteById(user.getId());
     }
 }

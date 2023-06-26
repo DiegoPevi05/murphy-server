@@ -1,6 +1,10 @@
 package com.medicapp.server.authentication.service;
 
+import com.medicapp.server.authentication.dto.AuthenticationRequest;
+import com.medicapp.server.authentication.dto.AuthenticationResponse;
 import com.medicapp.server.authentication.dto.RegisterRequest;
+import com.medicapp.server.authentication.model.ConfirmationToken;
+import com.medicapp.server.authentication.model.User;
 import com.medicapp.server.authentication.repository.TokenRepository;
 import com.medicapp.server.authentication.repository.UserRepository;
 import com.medicapp.server.doctors.repository.DoctorRepository;
@@ -8,21 +12,21 @@ import com.medicapp.server.email.EmailService;
 import org.junit.Before;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.*;
@@ -44,6 +48,15 @@ public class AuthenticationServiceTest {
 
     @Mock
     private ConfirmationTokenService confirmationTokenService;
+
+    @Mock
+    private AuthenticationManager authenticationManager;
+
+    @Mock
+    private JwtService jwtService;
+    @Mock
+    private TokenRepository tokenRepository;
+
 
     @Test
     public void testRegister() throws Exception {
@@ -99,6 +112,99 @@ public class AuthenticationServiceTest {
         assertEquals("Activation Account", subjectCaptor.getValue());
         assertEquals("Activate your Account", messageCaptor.getValue());
         assertEquals(registerRequest.getFirstname(), firstNameCaptor.getValue());
+    }
+
+    @Test
+    public void testAuthenticate() {
+        // Create an AuthenticationRequest object
+        AuthenticationRequest authenticationRequest = AuthenticationRequest.builder()
+                .email("test@example.com" )
+                .password("password")
+                .build();
+
+        // Create a User object
+        User user = User.builder()
+                .email("test@example.com")
+                .password("encodedPassword")
+                .build();
+
+        // Create a JWT token
+        String jwtToken = "dummyToken";
+
+        // Mock the authenticationManager behavior
+        Authentication authentication = Mockito.mock(Authentication.class);
+        Mockito.when(authenticationManager.authenticate(Mockito.any(UsernamePasswordAuthenticationToken.class)))
+                .thenReturn(authentication);
+
+        // Mock the userRepository behavior
+        Mockito.when(userRepository.findByEmail(authenticationRequest.getEmail()))
+                .thenReturn(Optional.of(user));
+
+        // Mock the jwtService behavior
+        Mockito.when(jwtService.generateToken(user))
+                .thenReturn(jwtToken);
+
+        // Perform the authenticate operation
+        AuthenticationResponse result = authenticationService.authenticate(authenticationRequest);
+
+        // Verify the authenticationManager interaction
+        Mockito.verify(authenticationManager)
+                .authenticate(Mockito.any(UsernamePasswordAuthenticationToken.class));
+
+        // Verify the userRepository interaction
+        Mockito.verify(userRepository).findByEmail(authenticationRequest.getEmail());
+
+        // Verify the jwtService interaction
+        Mockito.verify(jwtService).generateToken(user);
+
+        // Assert the result
+        assertNotNull(result);
+        assertEquals(jwtToken, result.getToken());
+    }
+
+    @Test
+    public void testConfirmToken() {
+
+        // Create a mock User
+        User user = User.builder()
+                .email("test@example.com")
+                .enabled(false)
+                .build();
+
+        // Create a mock ConfirmationToken
+        ConfirmationToken confirmationToken = ConfirmationToken.builder()
+                .token("dummyToken")
+                .confirmedAt(null)
+                .expiresAt(LocalDateTime.now().plusDays(1))
+                .user(user)
+                .build();
+
+        // Mock the confirmationTokenService behavior
+        Mockito.when(confirmationTokenService.getToken("dummyToken"))
+                .thenReturn(Optional.of(confirmationToken));
+        //Mockito.when(confirmationTokenService).setConfirmedAt("dummyToken");
+
+        // Mock the userRepository behavior
+        Mockito.when(userRepository.findByEmailDisable(user.getEmail()))
+                .thenReturn(Optional.of(user));
+        Mockito.when(userRepository.save(user))
+                .thenReturn(user);
+
+        // Perform the confirmToken operation
+        String result =  authenticationService.confirmToken("dummyToken");
+
+        // Verify the confirmationTokenService interactions
+        Mockito.verify(confirmationTokenService).getToken("dummyToken");
+        Mockito.verify(confirmationTokenService).setConfirmedAt("dummyToken");
+
+        // Verify the userRepository interactions
+        Mockito.verify(userRepository).findByEmailDisable(user.getEmail());
+        Mockito.verify(userRepository).save(user);
+
+        // Assert the result
+        assertNotNull(result);
+        assertEquals("confirmed", result);
+        assertTrue(user.isEnabled());
     }
 
 
