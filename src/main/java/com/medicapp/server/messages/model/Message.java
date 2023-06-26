@@ -16,7 +16,7 @@ public class Message {
     private String sender_id;
     private String receiver_id;
     private String message;
-    private LocalDateTime date;
+    private String date;
     private Status status;
     private long timestamp;
 

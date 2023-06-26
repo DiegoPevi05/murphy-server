@@ -15,25 +15,27 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
 
-import java.time.LocalDateTime;
+
+import java.util.Set;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 public class ChatControllerTest {
 
     @Autowired
-    private WebSocketStompClient stompClient;
-
+    private ZSetOperations<String, Message> zSetOperations;
     @Autowired
-    private MockMvc mockMvc;
+    private WebSocketStompClient stompClient;
 
     @Autowired
     private TokenRepository tokenRepository;
@@ -97,13 +99,13 @@ public class ChatControllerTest {
         headers2.add("Authorization", jwtToken2);
         StompSession session2 = stompClient.connectAsync("ws://localhost:8080/ws", new StompSessionHandlerAdapter() {}).get();
 
-       /* // Prepare the message payload
+        // Prepare the message payload
         String messagePayload = "Hello, User 2!";
         Message message = new Message();
         message.setMessage(messagePayload);
         message.setReceiver_id(user2.getId().toString());
         message.setSender_id(user1.getId().toString());
-        message.setDate(LocalDateTime.now());
+        message.setDate("2021-05-05T12:00:00");
         message.setStatus(Status.MESSAGE);
 
         // Convert the message object to JSON
@@ -111,13 +113,25 @@ public class ChatControllerTest {
         String messageJson = objectMapper.writeValueAsString(message);
 
         // Send the message from User 1 to User 2
-        session1.send("/app/private-message", messageJson.getBytes());
+        session1.send("/app/private-message", messageJson);
 
-        // Optionally, wait for a response or perform assertions based on the behavior of your application
+        // Wait for a response or perform assertions based on the behavior of your application
+
+        // Sleep for a while to allow processing and storing the message in Redis
+        Thread.sleep(1000); // Adjust the duration as needed
+
+        // Retrieve messages from Redis
+        Set<Message> messages = zSetOperations.range("messages", 0, -1);
+
+        // Assert that the message is stored in Redis
+        assertNotNull(messages);
+        assertEquals(1, messages.size());
+        Message storedMessage = messages.iterator().next();
+        assertEquals(messagePayload, storedMessage.getMessage());
 
         // Close the WebSocket sessions
-        session1.disconnect();
-        session2.disconnect();*/
+        //session1.disconnect();
+        //session2.disconnect();
     }
 
     private void saveUserToken(User user, String jwtToken) {

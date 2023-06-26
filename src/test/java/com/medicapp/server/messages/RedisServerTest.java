@@ -1,6 +1,4 @@
 package com.medicapp.server.messages;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.medicapp.server.messages.model.Message;
 import com.medicapp.server.messages.model.Status;
 import org.junit.jupiter.api.Test;
@@ -8,11 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.ZSetOperations;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+
 import java.util.Set;
 
-import static org.aspectj.bridge.MessageUtil.fail;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest

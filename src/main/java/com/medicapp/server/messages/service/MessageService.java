@@ -41,9 +41,10 @@ public class MessageService {
         String receiverId = message.getReceiver_id();
         // Validate sender and receiver information, perform necessary checks
 
+        saveMessageToRedis(message);
         String privateDestination = "/user/" + receiverId + "/private";
         simpMessagingTemplate.convertAndSend(privateDestination, message);
-        saveMessageToRedis(message);
+
     }
 
     private void saveMessageToRedis(Message message) {
@@ -59,3 +60,4 @@ public class MessageService {
         return new ArrayList<>(messages);
     }
 }
+
