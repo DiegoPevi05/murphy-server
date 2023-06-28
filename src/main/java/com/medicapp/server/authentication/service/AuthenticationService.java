@@ -10,7 +10,6 @@ import com.medicapp.server.config.ExceptionHandlerConfig;
 import com.medicapp.server.doctors.model.Doctor;
 import com.medicapp.server.doctors.repository.DoctorRepository;
 import com.medicapp.server.email.EmailService;
-import jakarta.annotation.PostConstruct;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
@@ -59,9 +58,11 @@ public class AuthenticationService {
     private String female_profile_image;
 
     public String register(RegisterRequest request) throws MessagingException {
-        if(userRepository.findByEmail(request.getEmail()).isPresent())
-            throw new ExceptionHandlerConfig.ResourceNotFoundException(
-                    "Usuario con email "+request.getEmail()+ " ya existe");
+        userRepository.findByEmail(request.getEmail())
+                .ifPresent(user -> {
+                    throw new ExceptionHandlerConfig.ResourceNotFoundException(
+                            "Usuario con email "+request.getEmail()+ " ya existe");
+                });
 
         String defaultProfileImage = "";
         if(!request.getSex().isEmpty() && request.getSex().equals("male")){

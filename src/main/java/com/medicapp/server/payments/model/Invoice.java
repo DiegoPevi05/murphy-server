@@ -30,7 +30,7 @@ public class Invoice {
 
         private Boolean isPaid = false;
 
-        @ManyToOne
+        @OneToOne
         @JoinColumn(
                 name = "appointment_id",
                 referencedColumnName = "id",

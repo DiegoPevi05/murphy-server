@@ -55,9 +55,10 @@ public class UserService {
     }
 
     public void addUser(RegisterRequest registerRequest){
-        if(userRepository.findByEmail(registerRequest.getEmail()).isPresent())
+        if(userRepository.findByEmail(registerRequest.getEmail()).isPresent()){
             throw new ExceptionHandlerConfig.ResourceNotFoundException(
-                    "Usuario con email "+registerRequest.getEmail()+ " ya existe");
+                    "User with email "+registerRequest.getEmail()+ " already exists");
+        }
 
         String defaultProfileImage = "";
         if(!registerRequest.getSex().isEmpty() && registerRequest.getSex().equals("male")){

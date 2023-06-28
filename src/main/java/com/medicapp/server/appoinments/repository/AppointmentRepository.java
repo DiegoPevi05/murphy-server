@@ -2,6 +2,7 @@ package com.medicapp.server.appoinments.repository;
 
 import com.medicapp.server.appoinments.model.Appointment;
 import com.medicapp.server.doctors.model.Specialty;
+import com.medicapp.server.prescriptions.model.Prescription;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public interface AppointmentRepository extends JpaRepository<Appointment, Integer> {
     @Query("SELECT a FROM Appointment a WHERE YEAR(a.date) = YEAR(:date) AND MONTH(a.date) = MONTH(:date) AND DAY(a.date) = DAY(:date) AND a.user.id = :user_id")
