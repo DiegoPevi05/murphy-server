@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v1/doctor/prescription")
+@RequestMapping("/api/v1/user/prescription")
 @RequiredArgsConstructor
 public class PrescriptionUserController {
 
