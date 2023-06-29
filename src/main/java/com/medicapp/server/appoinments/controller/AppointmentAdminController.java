@@ -30,6 +30,7 @@ public class AppointmentAdminController {
         if (!date.isEmpty()) {
             dateTime = LocalDateTime.parse(date);
         }
+
         return appointmentService.getAppointments(page,size,dateTime,isMonth,specialty,user_id);
     }
 
