@@ -6,10 +6,10 @@ on:
       - main
 
 env:
-  ECR_REGISTRY: 724218931517.dkr.ecr.sa-east-1.amazonaws.com
-  ECR_REPOSITORY: murphy-registry
+  ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+  ECR_REPOSITORY: ${{secrets.ECR_REPOSITORY }}
   IMAGE_TAG: latest
-  AWS_REGION: sa-east-1
+  AWS_REGION: ${{secrets.AWS_REGION }}
 
 jobs:
   build:
@@ -25,12 +25,24 @@ jobs:
           echo "REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}" >> .env
           echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> .env
           echo "POSTGRES_PORT=${{ secrets.POSTGRES_PORT }}" >> .env
+          echo "POSTGRES_PORT_INT=${{ secrets.POSTGRES_PORT_INT }}" >> .env
           echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> .env
           echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
           echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> .env
           echo "PGADMIN_PORT=${{ secrets.PGADMIN_PORT }}" >> .env
           echo "PGADMIN_DEFAULT_EMAIL=${{secrets.PGADMIN_DEFAULT_EMAIL}}" >> .env
           echo "PGADMIN_DEFAULT_PASSWORD=${{secrets.PGADMIN_DEFAULT_PASSWORD}}" >> .env
+          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
+          echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> .env
+          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> .env
+          echo "AWS_REGION=${{ env.AWS_REGION }}" >> .env
+          echo "APP_ADMIN_USER=${{ secrets.APP_ADMIN_USER }}" >> .env
+          echo "APP_ADMIN_PASSWORD=${{ secrets.APP_ADMIN_PASSWORD }}" >> .env
+          echo "APP_ADMIN_EMAIL=${{ secrets.APP_ADMIN_EMAIL }}" >> .env
+          echo "MAIL_SMTP_HOST=${{ secrets.MAIL_SMTP_HOST }}" >> .env
+          echo "MAIL_SMTP_PORT=${{ secrets.MAIL_SMTP_PORT }}" >> .env
+          echo "MAIL_SMTP_USERNAME=${{ secrets.MAIL_SMTP_USERNAME }}" >> .env
+          echo "MAIL_SMTP_PASSWORD=${{ secrets.MAIL_SMTP_PASSWORD }}" >> .env
 
       - name: Configure AWS Credentials
         run: |
