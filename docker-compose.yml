@@ -5,7 +5,7 @@ services:
     container_name: redis_medicapp
     command: redis-server --requirepass ${REDIS_PASSWORD}
     ports:
-      - ${REDIS_PORT}:6379
+      - ${REDIS_PORT}:${REDIS_PORT}
     volumes:
       - ./var/redis_data:/data
     environment:
@@ -16,7 +16,7 @@ services:
   db_postgres:
     image: postgres:14-alpine
     ports:
-      - ${POSTGRES_PORT}:5432
+      - ${POSTGRES_PORT}:${POSTGRES_PORT_INT}
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
@@ -45,13 +45,24 @@ services:
       - redis
       - db_postgres
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db_postgres:5432/${POSTGRES_DB}
+      CREDENTIALS_ADMIN_USERNAME: ${APP_ADMIN_USER}
+      CREDENTIALS_ADMIN_PASSWORD: ${APP_ADMIN_PASSWORD}
+      CREDENTIALS_ADMIN_EMAIL: ${APP_ADMIN_EMAIL}
+      CLOUD_AWS_CREDENTIALS_ACCESS-KEY: ${AWS_ACCESS_KEY_ID}
+      CLOUD_AWS_CREDENTIALS_SECRET-KEY: ${AWS_SECRET_ACCESS_KEY}
+      CLOUD_AWS_REGION_STATIC: ${AWS_REGION}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db_postgres:${SPRING_MAIL_PORT_INT}/${POSTGRES_DB}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       SPRING_JPA_HIBERNATE_DDL_AUTO: create-drop
       SPRING_DATA_REDIS_HOST: redis
-      SPRING_DATA_REDIS_PORT: 6379
+      SPRING_DATA_REDIS_PORT: ${REDIS_PORT}
       SPRING_DATA_REDIS_PASSWORD: ${REDIS_PASSWORD}
+      SPRING_MAIL_HOST: ${MAIL_SMTP_HOST}
+      SPRING_MAIL_PORT: ${MAIL_SMTP_PORT}
+      SPRING_MAIL_USERNAME: ${MAIL_SMTP_USERNAME}
+      SPRING_MAIL_PASSWORD: ${MAIL_SMTP_PASSWORD}
+      SECURITY_JWT_SECRET: ${JWS_SECRET}
     networks:
       - medicapp_network
 
