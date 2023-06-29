@@ -9,7 +9,7 @@ env:
   ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
   ECR_REPOSITORY: ${{secrets.ECR_REPOSITORY }}
   IMAGE_TAG: latest
-  AWS_REGION: ${{secrets.AWS_REGION }}
+  AWS_REGION: ${{secrets.ECR_AWS_REGION }}
 
 jobs:
   build:
