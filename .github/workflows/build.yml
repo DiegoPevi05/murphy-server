@@ -58,9 +58,9 @@ jobs:
       - name: Build and Push PostgreSQL Image
         run: |
           docker build -t ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}/postgres:${{ env.IMAGE_TAG }} -f Dockerfile.postgres .
-          docker push ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}/postgres:${{ env.IMAGE_TAG }}
+          docker push ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}/postgres:${{ env.IMAGE_TAG }} --debug
 
       - name: Build and Push Spring App Image
         run: |
           docker build -t ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}/medicapp:${{ env.IMAGE_TAG }} .
-          docker push ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}/medicapp:${{ env.IMAGE_TAG }}
+          docker push ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}/medicapp:${{ env.IMAGE_TAG }} --debug
