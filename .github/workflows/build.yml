@@ -64,7 +64,7 @@ jobs:
           SLACK_MESSAGE: " * Build and Push Docker Image :docker: of PostgreSQL :postgresql: to AWS ECR :aws:"
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
-          docker build -t ${{ env.ECR_REPOSITORY }}:postgresql/latest -f Dockerfile.postgres .
+          docker build -t ${{ env.ECR_REPOSITORY }} -f Dockerfile.postgres .
           docker tag ${{ env.ECR_REPOSITORY }}:postgresql/latest ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:postgresql/latest
           docker push ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:postgresql/latest
           curl -X POST -H 'Content-type: application/json' --data '{"text":"'"${SLACK_MESSAGE}"'"}' ${{ secrets.SLACK_WEBHOOK_URL }}
@@ -74,7 +74,7 @@ jobs:
           SLACK_MESSAGE: " * Build and Push Docker Image :docker: of Murphy Spring :java: :spring: to AWS ECR :aws:"
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
-          docker build -t ${{ env.ECR_REPOSITORY }}:springserver/latest -f Dockerfile .
-          docker tag ${{ env.ECR_REPOSITORY }}:springserver/latest ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:springserver/latest
-          docker push ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:springserver/latest
+          docker build -t ${{ env.ECR_REPOSITORY }} -f Dockerfile .
+          docker tag ${{ env.ECR_REPOSITORY }}:latest ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:latest
+          docker push ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:latest
           curl -X POST -H 'Content-type: application/json' --data '{"text":"'"${SLACK_MESSAGE}"'"}' ${{ secrets.SLACK_WEBHOOK_URL }}
