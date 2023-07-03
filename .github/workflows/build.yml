@@ -71,7 +71,7 @@ jobs:
 
       - name: Build and Push Spring App Image
         env:
-          SLACK_MESSAGE: " * Build and Push Docker Image :docker: of SpringApp :java: :spring: to AWS ECR :aws:"
+          SLACK_MESSAGE: " * Build and Push Docker Image :docker: of Murphy Spring :java: :spring: to AWS ECR :aws:"
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
           docker build -t ${{ env.ECR_REPOSITORY }} -f Dockerfile .
