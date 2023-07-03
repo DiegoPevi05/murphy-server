@@ -65,8 +65,8 @@ jobs:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
           docker build -t ${{ env.ECR_REPOSITORY }} -f Dockerfile.postgres .
-          docker tag ${{ env.ECR_REPOSITORY }}:postgresql/latest ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:postgresql/latest
-          docker push ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:postgresql/latest
+          docker tag ${{ env.ECR_REPOSITORY }}:latest ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}/postgresql:latest
+          docker push ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}/postgresql:latest
           curl -X POST -H 'Content-type: application/json' --data '{"text":"'"${SLACK_MESSAGE}"'"}' ${{ secrets.SLACK_WEBHOOK_URL }}
 
       - name: Build and Push Spring App Image
