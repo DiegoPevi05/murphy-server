@@ -7,7 +7,8 @@ on:
 
 env:
   ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
-  ECR_REPOSITORY: ${{secrets.ECR_REPOSITORY }}
+  ECR_REPOSITORY_PSQL: ${{secrets.ECR_REPOSITORY_PSQL }}
+  ECR_REPOSITORY_SPRING: ${{ secrets.ECR_REPOSITORY_SPRING }}
   IMAGE_TAG: latest
   AWS_REGION: ${{secrets.ECR_AWS_REGION }}
 
@@ -64,9 +65,9 @@ jobs:
           SLACK_MESSAGE: " * Build and Push Docker Image :docker: of PostgreSQL :postgresql: to AWS ECR :aws:"
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
-          docker build -t ${{ env.ECR_REPOSITORY }} -f Dockerfile.postgres .
-          docker tag ${{ env.ECR_REPOSITORY }}:latest ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}/postgresql:latest
-          docker push ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}/postgresql:latest
+          docker build -t ${{ env.ECR_REPOSITORY_PSQL }} -f Dockerfile.postgres .
+          docker tag ${{ env.ECR_REPOSITORY_PSQL }}:latest ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY_PSQL }}:latest
+          docker push ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY_PSQL }}:latest
           curl -X POST -H 'Content-type: application/json' --data '{"text":"'"${SLACK_MESSAGE}"'"}' ${{ secrets.SLACK_WEBHOOK_URL }}
 
       - name: Build and Push Spring App Image
@@ -74,7 +75,7 @@ jobs:
           SLACK_MESSAGE: " * Build and Push Docker Image :docker: of Murphy Spring :java: :spring: to AWS ECR :aws:"
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
-          docker build -t ${{ env.ECR_REPOSITORY }} -f Dockerfile .
-          docker tag ${{ env.ECR_REPOSITORY }}:latest ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:latest
-          docker push ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:latest
+          docker build -t ${{ env.ECR_REPOSITORY_SPRING }} -f Dockerfile .
+          docker tag ${{ env.ECR_REPOSITORY_SPRING }}:latest ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY_SPRING }}:latest
+          docker push ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY_SPRING }}:latest
           curl -X POST -H 'Content-type: application/json' --data '{"text":"'"${SLACK_MESSAGE}"'"}' ${{ secrets.SLACK_WEBHOOK_URL }}
