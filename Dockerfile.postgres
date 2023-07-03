@@ -1,0 +1,15 @@
+# Use the official PostgreSQL image as the base image
+FROM postgres:14-alpine
+
+# Set environment variables
+ENV POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+ENV POSTGRES_DB=${POSTGRES_DB}
+
+# Copy the initialization SQL script to the container
+COPY init.sql /docker-entrypoint-initdb.d/
+
+# Expose the PostgreSQL port (optional)
+EXPOSE ${POSTGRES_PORT_INT}
+
+# Start the PostgreSQL server
+CMD ["postgres"]
