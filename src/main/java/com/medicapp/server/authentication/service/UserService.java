@@ -8,7 +8,6 @@ import com.medicapp.server.authentication.model.Role;
 import com.medicapp.server.authentication.model.User;
 import com.medicapp.server.authentication.repository.UserRepository;
 import com.medicapp.server.config.ExceptionHandlerConfig;
-import com.medicapp.server.doctors.dto.DoctorRequest;
 import com.medicapp.server.doctors.model.Doctor;
 import com.medicapp.server.doctors.repository.DoctorRepository;
 import jakarta.transaction.Transactional;
@@ -38,7 +37,8 @@ public class UserService {
     @Value("${default.image.profile_user_female}")
     private String female_profile_image;
 
-    private String bucketName =  "medicapp-bucket";
+    @Value("${cloud.aws.bucket.name}")
+    private String bucketName;
     private String filePath =  "ProfilesImages/";
 
     public UserResponse getMe(){
@@ -86,7 +86,7 @@ public class UserService {
     public void updateUserByUser(Integer User_id, UserRequest userRequest){
         User user = authenticationService.getUserAuthorize();
         if(!Objects.equals(user.getId(), User_id)){
-            throw new IllegalArgumentException("No tiene permisos para realizar esta accion");
+            throw new IllegalArgumentException("You do not have permission to update this user");
         }
         updateUser(User_id,userRequest);
     }
@@ -95,7 +95,7 @@ public class UserService {
     public void updateUser(Integer User_id, UserRequest userRequest){
         User user = userRepository.findById(User_id)
                 .orElseThrow(() -> new ExceptionHandlerConfig.ResourceNotFoundException(
-                        "Doctor con id " + User_id + " no existe"
+                        "User with id " + User_id + " does not exist"
                 ));
         if (userRequest.getFirstname() != null && !userRequest.getFirstname().isEmpty() && !Objects.equals(userRequest.getFirstname(), user.getFirstname())) {
             user.setFirstname(userRequest.getFirstname());
@@ -123,7 +123,7 @@ public class UserService {
     public void deleteUser(int User_id){
         User user = userRepository.findById(User_id)
                 .orElseThrow(() -> new ExceptionHandlerConfig.ResourceNotFoundException(
-                        "User con id " + User_id + " no existe"
+                        "User with id " + User_id + " does not exist"
                 ));
 
         Optional<Doctor> doctor = doctorRepository.findByUserEmail(user.getEmail());

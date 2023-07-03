@@ -37,7 +37,7 @@ public class AppointmentAdminController {
     @PostMapping
     public ResponseEntity<String> registerAppointment(@RequestBody AppointmentRequest appointmentRequest){
         appointmentService.addAppointment(appointmentRequest);
-        return ResponseEntity.status(HttpStatus.OK).body("Meet Created Successfully.");
+        return ResponseEntity.status(HttpStatus.OK).body("Appointment Created Successfully.");
     }
 
     @DeleteMapping(path="{appointment_id}")

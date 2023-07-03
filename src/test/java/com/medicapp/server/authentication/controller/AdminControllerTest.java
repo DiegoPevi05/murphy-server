@@ -5,11 +5,7 @@ import com.medicapp.server.authentication.dto.AuthenticationRequest;
 import com.medicapp.server.authentication.dto.AuthenticationResponse;
 import com.medicapp.server.authentication.dto.RegisterRequest;
 import com.medicapp.server.authentication.dto.UserRequest;
-import com.medicapp.server.authentication.repository.TokenRepository;
-import com.medicapp.server.authentication.repository.UserRepository;
-import com.medicapp.server.authentication.service.JwtService;
-import com.medicapp.server.config.AdminConfig;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -22,6 +18,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class AdminControllerTest {
     @Autowired
     private MockMvc mockMvc;
@@ -31,9 +28,11 @@ public class AdminControllerTest {
     @Value("${credentials.admin.password}")
     private String defaultAdminPassword;
 
-    @Test
-    public void testRegisterUser() throws Exception {
+    static String JwtToken;
 
+    @Test
+    @Order(1)
+    public void InitializeAdminToken() throws Exception {
         AuthenticationRequest authenticationRequest = AuthenticationRequest.builder()
                 .email(defaultAdminEmail)
                 .password(defaultAdminPassword)
@@ -45,10 +44,13 @@ public class AdminControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestAuthBody))
                 .andExpect(status().isOk());
-
         String responseString = response.andReturn().getResponse().getContentAsString();
         AuthenticationResponse authenticationResponse = new ObjectMapper().readValue(responseString, AuthenticationResponse.class);
-        String JwtToken = authenticationResponse.getToken();
+        JwtToken = authenticationResponse.getToken();
+    }
+
+    @Test
+    public void testRegisterUser() throws Exception {
 
         RegisterRequest registerRequest = RegisterRequest.builder()
                 .email("maria.gracia@gmail.com")
@@ -76,21 +78,6 @@ public class AdminControllerTest {
 
     @Test
     public void testUpdateUser() throws Exception {
-        AuthenticationRequest authenticationRequest = AuthenticationRequest.builder()
-                .email(defaultAdminEmail)
-                .password(defaultAdminPassword)
-                .build();
-
-        String requestAuthBody = new ObjectMapper().writeValueAsString(authenticationRequest);
-
-        var response = mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/public/auth/authenticate")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestAuthBody))
-                .andExpect(status().isOk());
-
-        String responseString = response.andReturn().getResponse().getContentAsString();
-        AuthenticationResponse authenticationResponse = new ObjectMapper().readValue(responseString, AuthenticationResponse.class);
-        String JwtToken = authenticationResponse.getToken();
 
         UserRequest userRequest = UserRequest.builder()
                 .firstname("Maria")
@@ -114,21 +101,6 @@ public class AdminControllerTest {
 
     @Test
     public void testDeleteUser() throws Exception {
-        AuthenticationRequest authenticationRequest = AuthenticationRequest.builder()
-                .email(defaultAdminEmail)
-                .password(defaultAdminPassword)
-                .build();
-
-        String requestAuthBody = new ObjectMapper().writeValueAsString(authenticationRequest);
-
-        var response = mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/public/auth/authenticate")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestAuthBody))
-                .andExpect(status().isOk());
-
-        String responseString = response.andReturn().getResponse().getContentAsString();
-        AuthenticationResponse authenticationResponse = new ObjectMapper().readValue(responseString, AuthenticationResponse.class);
-        String JwtToken = authenticationResponse.getToken();
 
         mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/admin/user/2")
                         .header("Authorization", "Bearer " + JwtToken)

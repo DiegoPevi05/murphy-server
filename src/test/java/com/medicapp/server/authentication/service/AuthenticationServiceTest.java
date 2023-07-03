@@ -5,18 +5,11 @@ import com.medicapp.server.authentication.dto.AuthenticationResponse;
 import com.medicapp.server.authentication.dto.RegisterRequest;
 import com.medicapp.server.authentication.model.ConfirmationToken;
 import com.medicapp.server.authentication.model.User;
-import com.medicapp.server.authentication.repository.TokenRepository;
 import com.medicapp.server.authentication.repository.UserRepository;
-import com.medicapp.server.doctors.repository.DoctorRepository;
 import com.medicapp.server.email.EmailService;
-import org.junit.Before;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
 import org.mockito.*;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -24,7 +17,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -54,13 +46,10 @@ public class AuthenticationServiceTest {
 
     @Mock
     private JwtService jwtService;
-    @Mock
-    private TokenRepository tokenRepository;
 
 
     @Test
     public void testRegister() throws Exception {
-        // Mock the necessary dependencies
 
         // Create a RegisterRequest object
         RegisterRequest registerRequest = RegisterRequest.builder()

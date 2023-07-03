@@ -55,6 +55,7 @@ public class AdminConfig {
         saveUserToken(savedUser, jwtToken);
     }
 
+    //Make Available for Testing
     @PostConstruct
     public void createDefaultUser () {
         var user = User.builder()
@@ -72,6 +73,7 @@ public class AdminConfig {
         saveUserToken(savedUser, jwtToken);
     }
 
+    //Make Available for Testing
     @PostConstruct
     public void createDefaultDoctor () {
         var user = User.builder()

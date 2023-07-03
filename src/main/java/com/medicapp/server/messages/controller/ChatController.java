@@ -3,7 +3,7 @@ package com.medicapp.server.messages.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.medicapp.server.messages.model.Message;
+import com.medicapp.server.messages.dto.MessageRequest;
 import com.medicapp.server.messages.service.MessageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -24,13 +24,13 @@ public class ChatController {
 
         // Convert the JSON string to a Message object
         ObjectMapper objectMapper = new ObjectMapper();
-        Message message;
+        MessageRequest messageRequest;
         try {
-            message = objectMapper.readValue(messageJson, Message.class);
+            messageRequest = objectMapper.readValue(messageJson, MessageRequest.class);
         } catch (JsonProcessingException e) {
             return;
         }
         // Process the received message
-        messageService.processPrivateMessage(message);
+        messageService.processPrivateMessage(messageRequest);
     }
 }

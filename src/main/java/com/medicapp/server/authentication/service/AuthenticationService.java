@@ -61,7 +61,7 @@ public class AuthenticationService {
         userRepository.findByEmail(request.getEmail())
                 .ifPresent(user -> {
                     throw new ExceptionHandlerConfig.ResourceNotFoundException(
-                            "Usuario con email "+request.getEmail()+ " ya existe");
+                            "User with this email "+request.getEmail()+ " already exists");
                 });
 
         String defaultProfileImage = "";
@@ -204,24 +204,24 @@ public class AuthenticationService {
     public User getUserAuthorize(){
         UserDetails userDetails = getAuthenticatedUserDetail();
         if(!isUser(userDetails)){
-            throw new IllegalArgumentException("No es una cuenta de usuario");
+            throw new IllegalArgumentException("Is not a user account");
         }
         String userEmail = userDetails.getUsername();
         return userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new ExceptionHandlerConfig.ResourceNotFoundException(
-                        "Usuario con este correo "+userEmail+ " no existe"
+                        "Users with this email "+userEmail+ " does not exist"
                 ));
     }
 
     public Doctor getDoctorAuthorize(){
         UserDetails userDetails = getAuthenticatedUserDetail();
         if(!isDoctor(userDetails)){
-            throw new IllegalArgumentException("No es una cuenta de doctor");
+            throw new IllegalArgumentException("Is not a doctor account");
         }
         String doctorEmail = userDetails.getUsername();
         return doctorRepository.findByUserEmail(doctorEmail)
                 .orElseThrow(() -> new ExceptionHandlerConfig.ResourceNotFoundException(
-                        "Doctor con este correo "+doctorEmail+ " no existe"
+                        "Doctors with this email "+doctorEmail+ " does not exist"
                 ));
     }
 }

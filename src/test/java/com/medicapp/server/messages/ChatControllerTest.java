@@ -8,14 +8,15 @@ import com.medicapp.server.authentication.model.User;
 import com.medicapp.server.authentication.repository.TokenRepository;
 import com.medicapp.server.authentication.repository.UserRepository;
 import com.medicapp.server.authentication.service.JwtService;
-import com.medicapp.server.messages.model.Message;
+import com.medicapp.server.messages.dto.MessageResponse;
+import com.medicapp.server.messages.dto.MessageRequest;
 import com.medicapp.server.messages.model.Status;
-import lombok.RequiredArgsConstructor;
+import com.medicapp.server.messages.service.MessageService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.redis.core.ZSetOperations;
+import org.springframework.data.domain.Page;
 import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
@@ -34,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class ChatControllerTest {
 
     @Autowired
-    private ZSetOperations<String, Message> zSetOperations;
+    private MessageService messageService;
     @Autowired
     private WebSocketStompClient stompClient;
 
@@ -102,16 +103,15 @@ public class ChatControllerTest {
 
         // Prepare the message payload
         String messagePayload = "Hello, User 2!";
-        Message message = new Message();
-        message.setMessage(messagePayload);
-        message.setReceiver_id(user2.getId().toString());
-        message.setSender_id(user1.getId().toString());
-        message.setDate("2021-05-05T12:00:00");
-        message.setStatus(Status.MESSAGE);
+        MessageRequest messageRequest = new MessageRequest();
+        messageRequest.setMessage(messagePayload);
+        messageRequest.setReceiver_id(user2.getId().toString());
+        messageRequest.setSender_id(user1.getId().toString());
+        messageRequest.setStatus(Status.MESSAGE.toString());
 
         // Convert the message object to JSON
         ObjectMapper objectMapper = new ObjectMapper();
-        String messageJson = objectMapper.writeValueAsString(message);
+        String messageJson = objectMapper.writeValueAsString(messageRequest);
         // Convert the messageJson string to a byte array
         byte[] messageBytes = messageJson.getBytes(StandardCharsets.UTF_8);
 
@@ -124,12 +124,12 @@ public class ChatControllerTest {
         Thread.sleep(1000); // Adjust the duration as needed
 
         // Retrieve messages from Redis
-        Set<Message> messages = zSetOperations.range("messages", 0, -1);
+        Page<MessageResponse> messageResponses= messageService.retrieveMessageFromDB(0,10,user1.getId().toString(), user2.getId().toString());
 
         // Assert that the message is stored in Redis
-        assertNotNull(messages);
-        //assertEquals(1, messages.size());
-        System.out.println("Number of messages " + messages.size());
+        assertNotNull(messageResponses);
+        assertEquals(1, messageResponses.getTotalElements());
+        System.out.println("Number of messages " +messageResponses.getTotalElements());
         //Message storedMessage = messages.iterator().next();
         //assertEquals(messagePayload, storedMessage.getMessage());
 

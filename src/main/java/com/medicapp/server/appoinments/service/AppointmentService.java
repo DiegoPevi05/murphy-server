@@ -77,7 +77,7 @@ public class AppointmentService {
     public void addAppointmentUser(AppointmentRequest appointmentRequest){
         User user = authenticationService.getUserAuthorize();
         if(!Objects.equals(user.getId(), appointmentRequest.getUser_id())){
-            throw new IllegalArgumentException("No tiene permisos para realizar esta accion");
+            throw new IllegalArgumentException("You do not have permission to perform this action");
         }
         addAppointment(appointmentRequest);
     }
@@ -85,15 +85,15 @@ public class AppointmentService {
     public void addAppointment(AppointmentRequest appointmentRequest){
         User user = userRepository.findById(appointmentRequest.getUser_id())
                 .orElseThrow(() -> new ExceptionHandlerConfig.ResourceNotFoundException(
-                        "Usuario con id "+appointmentRequest.getUser_id()+ " no existe"
+                        "User with id "+appointmentRequest.getUser_id()+ " does not exist"
                 ));
         Doctor doctor = doctorRepository.findById(appointmentRequest.getDoctor_id())
                 .orElseThrow(() -> new ExceptionHandlerConfig.ResourceNotFoundException(
-                        "Doctor con id "+appointmentRequest.getDoctor_id()+ " no existe"
+                        "Doctor with id "+appointmentRequest.getDoctor_id()+ " does not exist"
                 ));
         TimeSheet timeSheet = timeSheetRepository.findTimeSheetByDate(appointmentRequest.getDate(), doctor)
                 .orElseThrow(() -> new ExceptionHandlerConfig.ResourceNotFoundException(
-                "No hay citas disponibles para la fecha "+appointmentRequest.getDate()+ " para el doctor "+ doctor.getUser().getFirstname()
+                "No appointments available for the date "+appointmentRequest.getDate()+ " and the doctor "+ doctor.getUser().getFirstname()
         ));
 
         timeSheet.setIsAvailable(false);
@@ -112,10 +112,10 @@ public class AppointmentService {
         User user = authenticationService.getUserAuthorize();
         Appointment appointment = appointmentRepository.findById(Appointment_id)
                 .orElseThrow(() -> new ExceptionHandlerConfig.ResourceNotFoundException(
-                        "Cita con id "+Appointment_id+ " no existe"
+                        "Appointment with id "+Appointment_id+ " does not exist"
                 ));
         if(!Objects.equals(appointment.getUser(), user)){
-            throw new IllegalArgumentException("No tiene permisos para realizar esta accion");
+            throw new IllegalArgumentException("You do not have permission to do this action");
         }
         deleteAppointment(Appointment_id);
     }
@@ -124,10 +124,10 @@ public class AppointmentService {
         User user = authenticationService.getUserAuthorize();
         Appointment appointment = appointmentRepository.findById(Appointment_id)
                 .orElseThrow(() -> new ExceptionHandlerConfig.ResourceNotFoundException(
-                        "Cita con id "+Appointment_id+ " no existe"
+                        "Appointment with id "+Appointment_id+ " does not exist"
                 ));
         if(!Objects.equals(appointment.getDoctor().getUser(), user)){
-            throw new IllegalArgumentException("No tiene permisos para realizar esta accion");
+            throw new IllegalArgumentException("You do not have permission to do this action");
         }
         deleteAppointment(Appointment_id);
     }
@@ -135,16 +135,16 @@ public class AppointmentService {
     public void deleteAppointment(int Appointment_id){
         Appointment appointment = appointmentRepository.findById(Appointment_id)
                 .orElseThrow(() -> new ExceptionHandlerConfig.ResourceNotFoundException(
-                        "Cita con id "+Appointment_id+ " no existe"
+                        "Appointment with id "+Appointment_id+ " does not exist"
                 ));
         Doctor doctor = doctorRepository.findById(appointment.getDoctor().getId())
                 .orElseThrow(() -> new ExceptionHandlerConfig.ResourceNotFoundException(
-                        "Doctor con id "+appointment.getDoctor().getId()+ " no existe"
+                        "Doctor with id "+appointment.getDoctor().getId()+ " does not exist"
                 ));
 
         TimeSheet timeSheet = timeSheetRepository.findTimeSheetByDate(appointment.getDate(), doctor)
                 .orElseThrow(() -> new ExceptionHandlerConfig.ResourceNotFoundException(
-                        "No hay citas disponibles para la fecha "+appointment.getDate()+ "para el doctor"+ doctor.getUser().getFirstname()
+                        "There are not appointments for the date "+appointment.getDate()+ "for the doctor"+ doctor.getUser().getFirstname()
                 ));
 
         timeSheet.setIsAvailable(true);
