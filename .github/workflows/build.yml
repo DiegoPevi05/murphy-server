@@ -52,8 +52,12 @@ jobs:
           aws configure set region ${{ env.AWS_REGION }}
 
       - name: Login to Amazon ECR
+        env:
+          SLACK_MESSAGE: " * Login to AWS ECR :aws:"
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
           aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.ECR_REGISTRY }}
+          curl -X POST -H 'Content-type: application/json' --data '{"text":"'"${SLACK_MESSAGE}"'"}' ${{ secrets.SLACK_WEBHOOK_URL }}
 
       - name: Build and Push PostgreSQL Image
         env:
