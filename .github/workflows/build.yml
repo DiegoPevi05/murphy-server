@@ -57,6 +57,10 @@ jobs:
         run: |
           ssh -i ~/.ssh/id_rsa ec2-user@54.233.195.2 "mkdir -p ./murphy-server"
 
+      - name: Copy .env file
+        run: |
+        scp -i ~/.ssh/id_rsa .env ec2-user@54.233.195.2:./murphy-server/
+
       - name: Pull from repository
         run: |
           ssh -i ~/.ssh/id_rsa ec2-user@54.233.195.2 "cd ./murphy-server && git pull origin main"
