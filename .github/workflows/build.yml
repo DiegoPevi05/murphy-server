@@ -46,36 +46,21 @@ jobs:
           echo "MAIL_SMTP_USERNAME=${{ secrets.MAIL_SMTP_USERNAME }}" >> .env
           echo "MAIL_SMTP_PASSWORD=${{ secrets.MAIL_SMTP_PASSWORD }}" >> .env
 
-      - name: Configure AWS Credentials
+      - name: Configure SSH
         run: |
-          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws configure set region ${{ env.AWS_REGION }}
+          mkdir -p ~/.ssh/
+          echo "${{ secrets.AWS_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan 54.233.195.2 >> ~/.ssh/known_hosts
 
-      - name: Login to Amazon ECR
-        env:
-          SLACK_MESSAGE: " * Login to AWS ECR :aws:"
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      - name: Create directory
         run: |
-          aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.ECR_REGISTRY }}
-          curl -X POST -H 'Content-type: application/json' --data '{"text":"'"${SLACK_MESSAGE}"'"}' ${{ secrets.SLACK_WEBHOOK_URL }}
+          ssh -i ~/.ssh/id_rsa ec2-user@54.233.195.2 "mkdir -p ./murphy-server"
 
-      - name: Build and Push PostgreSQL Image
-        env:
-          SLACK_MESSAGE: " * Build and Push Docker Image :docker: of PostgreSQL :postgresql: to AWS ECR :aws:"
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      - name: Pull from repository
         run: |
-          docker build -t ${{ env.ECR_REPOSITORY_PSQL }} -f Dockerfile.postgres .
-          docker tag ${{ env.ECR_REPOSITORY_PSQL }}:latest ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY_PSQL }}:latest
-          docker push ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY_PSQL }}:latest
-          curl -X POST -H 'Content-type: application/json' --data '{"text":"'"${SLACK_MESSAGE}"'"}' ${{ secrets.SLACK_WEBHOOK_URL }}
+          ssh -i ~/.ssh/id_rsa ec2-user@54.233.195.2 "cd ./murphy-server && git pull"
 
-      - name: Build and Push Spring App Image
-        env:
-          SLACK_MESSAGE: " * Build and Push Docker Image :docker: of Murphy Spring :java: :spring: to AWS ECR :aws:"
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      - name: Start Docker Compose
         run: |
-          docker build -t ${{ env.ECR_REPOSITORY_SPRING }} -f Dockerfile .
-          docker tag ${{ env.ECR_REPOSITORY_SPRING }}:latest ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY_SPRING }}:latest
-          docker push ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY_SPRING }}:latest
-          curl -X POST -H 'Content-type: application/json' --data '{"text":"'"${SLACK_MESSAGE}"'"}' ${{ secrets.SLACK_WEBHOOK_URL }}
+          ssh -i ~/.ssh/id_rsa ec2-user@54.233.195.2 "cd ./murphy-server && docker-compose up -d"
