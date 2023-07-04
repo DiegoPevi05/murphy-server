@@ -55,16 +55,16 @@ jobs:
 
       - name: Create directory
         run: |
-          ssh -i ~/.ssh/id_rsa ec2-user@54.233.195.2 "mkdir -p ./murphy-server"
+          ssh -i ~/.ssh/id_rsa ec2-user@${{ secrets.AWS_EC2_PUBLIC_IP }} "mkdir -p ./murphy-server"
 
       - name: Copy .env file
         run: |
-          scp -i ~/.ssh/id_rsa .env ec2-user@54.233.195.2:./murphy-server/
+          scp -i ~/.ssh/id_rsa .env ec2-user@${{ secrets.AWS_EC2_PUBLIC_IP }}:./murphy-server/
 
       - name: Pull from repository
         run: |
-          ssh -i ~/.ssh/id_rsa ec2-user@54.233.195.2 "cd ./murphy-server && git pull origin main"
+          ssh -i ~/.ssh/id_rsa ec2-user@${{ secrets.AWS_EC2_PUBLIC_IP }} "cd ./murphy-server && git pull origin main"
 
       - name: Start Docker Compose
         run: |
-          ssh -i ~/.ssh/id_rsa ec2-user@54.233.195.2 "cd ./murphy-server && docker-compose up -d"
+          ssh -i ~/.ssh/id_rsa ec2-user@${{ secrets.AWS_EC2_PUBLIC_IP }} "cd ./murphy-server && docker-compose up -d"
