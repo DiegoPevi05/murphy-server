@@ -29,7 +29,6 @@ services:
     ports:
       - 8080:8080
     depends_on:
-      - redis
       - db_postgres
     environment:
       CREDENTIALS_ADMIN_USERNAME: ${APP_ADMIN_USER}
