@@ -51,7 +51,7 @@ jobs:
           mkdir -p ~/.ssh/
           echo "${{ secrets.AWS_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan 54.233.195.2 >> ~/.ssh/known_hosts
+          ssh-keyscan ${{ secrets.AWS_EC2_PUBLIC_IP }} >> ~/.ssh/known_hosts
 
       - name: Create directory
         run: |
