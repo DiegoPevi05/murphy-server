@@ -59,7 +59,7 @@ jobs:
 
       - name: Copy .env file
         run: |
-        scp -i ~/.ssh/id_rsa .env ec2-user@54.233.195.2:./murphy-server/
+          scp -i ~/.ssh/id_rsa .env ec2-user@54.233.195.2:./murphy-server/
 
       - name: Pull from repository
         run: |
