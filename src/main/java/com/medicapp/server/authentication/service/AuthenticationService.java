@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Objects;
+import java.util.Random;
 import java.util.UUID;
 
 @Service
@@ -149,6 +150,48 @@ public class AuthenticationService {
         return AuthenticationResponse.builder()
                 .token(jwtToken)
                 .build();
+    }
+
+    public void GenerateRecoverPasswordCode(String email) throws MessagingException {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ExceptionHandlerConfig.ResourceNotFoundException(
+                        "User with email "+email+ " does not exists"
+                ));
+        if(!Objects.equals(user.getRole(),Role.ROLE_USER) && !Objects.equals(user.getRole(),Role.ROLE_DOCTOR)){
+            throw new IllegalArgumentException("Only users can change their password");
+        }
+
+        String recoverCode = GenerateRecoverCode();
+        user.setRecoverCode(recoverCode);
+        userRepository.save(user);
+        //Message to User
+        emailService.send(email,
+                "Code of Recovery",
+                "Recovery Code",
+                user.getFirstname(),
+                "Use this recover code to recover your account"+recoverCode,
+                null,
+                "message");
+    }
+    public void ValidateRecoverCode(String email,String recoverCode){
+        User user = userRepository.findByRecoverCodeAndEmail(recoverCode,email)
+                .orElseThrow(() -> new ExceptionHandlerConfig.ResourceNotFoundException(
+                        "Recover Code for user not found"
+                ));
+    }
+    public void ResetPasswordUser(String email,String recoverCode,String password){
+        User user = userRepository.findByRecoverCodeAndEmail(recoverCode,email)
+                .orElseThrow(() -> new ExceptionHandlerConfig.ResourceNotFoundException(
+                        "Recover Code for user not found"
+                ));
+        user.setRecoverCode(null);
+        user.setPassword(passwordEncoder.encode(password));
+        userRepository.save(user);
+    }
+
+    private String GenerateRecoverCode(){
+        Random random = new Random();
+        return String.format("%04d", random.nextInt(10000));
     }
 
     private void saveUserToken(User user, String jwtToken) {

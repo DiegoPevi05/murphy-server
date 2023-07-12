@@ -7,6 +7,7 @@ import com.medicapp.server.authentication.service.AuthenticationService;
 import com.medicapp.server.authentication.service.AuthenticationServiceOAuth2;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -43,5 +44,24 @@ public class AuthenticationController {
     @PostMapping("/confirm")
     public ResponseEntity<String> authenticate(@RequestParam(value = "token", defaultValue = "") String token) {
         return ResponseEntity.ok(authenticationService.confirmToken(token));
+    }
+
+    @PostMapping(value="/reset-password/code")
+    public ResponseEntity<String> GenerateResetPassword(@RequestParam String email) throws MessagingException {
+        authenticationService.GenerateRecoverPasswordCode(email);
+        return ResponseEntity.status(HttpStatus.OK).body("Reset Code has send to your account.");
+    }
+    @PostMapping(value="/validate-code")
+    public ResponseEntity<String> ValidateResetPasswordCode(@RequestParam String email,
+                                                            @RequestParam String recoverCode) {
+        authenticationService.ValidateRecoverCode(email,recoverCode);
+        return ResponseEntity.status(HttpStatus.OK).body("Reset Code is valid.");
+    }
+    @PostMapping(value="/reset-password/reset")
+    public ResponseEntity<String> ResetPassword(@RequestParam String email,
+                                                @RequestParam String recoverCode,
+                                                @RequestParam String password) {
+        authenticationService.ResetPasswordUser(email,recoverCode,password);
+        return ResponseEntity.status(HttpStatus.OK).body("Password has been reset.");
     }
 }

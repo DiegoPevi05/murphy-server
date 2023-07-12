@@ -15,13 +15,8 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     Optional<User> findByEmailDisable(String email);
     @Query("SELECT u FROM User u WHERE u.email = :email AND u.enabled = true")
     Optional<User> findByEmail(String email);
-    @Query("SELECT u FROM User u WHERE u.role = com.medicapp.server.authentication.model.Role.ROLE_MODERATOR OR u.role = com.medicapp.server.authentication.model.Role.ROLE_USER")
-    Page<User> findAllUsersWithRoleModeratorOrUser(Pageable pageable);
-
-    Page<User> findByEmailAndRole(String email, Role role, Pageable pageable);
-    @Query("SELECT u FROM User u WHERE u.email LIKE %?1% ")
-    Page<User> findByEmail(String email, Pageable pageable);
-    Page<User> findByRole(Role role, Pageable pageable);
+    @Query("SELECT u FROM User u WHERE u.email = :email AND u.recoverCode = :recoverCode AND u.enabled = true")
     Optional<User> findByRecoverCodeAndEmail(String recoverCode,String email);
+
 
 }
